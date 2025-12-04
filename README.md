@@ -3956,6 +3956,70 @@ card_mod:
 
 ```
 </details>
+<details>
+  <summary><strong>31 - EV Battery (Charging animation)</strong></summary>
+
+  ![card31-ev-battery-preview](https://github.com/user-attachments/assets/90b2c0e3-ae1b-4e50-827c-94b56db9546e)
+
+  ```yaml
+type: custom:mushroom-entity-card
+entity: sensor.ev_battery_level
+name: EV Battery
+icon: mdi:car-electric
+icon_color: green
+card_mod:
+  style:
+    mushroom-shape-icon$: |
+      .shape {
+        {# ========== USER CONFIG ========== #}
+        {# Use number mode: battery percentage drives visuals #}
+        {% set use_number      = true %}
+
+        {# NUMBER MODE SETTINGS #}
+        {# Battery level entity (0–100) #}
+        {% set number_entity   = 'sensor.ev_battery_level' %}
+
+        {# Threshold just controls when animation can be active #}
+        {% set number_operator = '>' %}
+        {% set threshold       = 0 %}
+
+        {# Optional: only animate when charging #}
+        {# Set to a real charging sensor or 'none' #}
+        {% set charging_entity = 'binary_sensor.ev_charging' %}
+        {# ========== END USER CONFIG ====== #}
+
+        {# -------- TRIGGER DECISION LOGIC -------- #}
+        {% set num = states(number_entity) | int(0) %}
+
+        {% if number_operator == '>' %}
+          {% set trigger_active = (num > threshold) %}
+        {% elif number_operator == '<' %}
+          {% set trigger_active = (num < threshold) %}
+        {% elif number_operator == '=' %}
+          {% set trigger_active = (num == threshold) %}
+        {% elif number_operator == '>=' %}
+          {% set trigger_active = (num >= threshold) %}
+        {% elif number_operator == '<=' %}
+          {% set trigger_active = (num <= threshold) %}
+        {% else %}
+          {% set trigger_active = false %}
+        {% endif %}
+
+        {# Optional: gate by charging-state if that entity exists #}
+        {% if charging_entity != 'none' %}
+          {% if states(charging_entity) not in ['on', 'charging'] %}
+            {% set trigger_active = false %}
+          {% endif %}
+        {% endif %}
+        {# ------ END TRIGGER DECISION LOGIC ------ #}
+
+        {# Battery-level buckets #}
+        {% set battery = num %}
+        {% if battery <= 15 %}
+          {% set level = 'low' %}
+        {% elif battery <= 80 %}
+</details>
+
 
 ---
 
