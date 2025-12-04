@@ -4020,28 +4020,3 @@ card_mod:
         {% elif battery <= 80 %}
 </details>
 
-
----
-
-[paypal_me_shield]: https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white
-
-[paypal_me]: https://paypal.me/anasboxsupport
-
-[revolut_me_shield]:
-https://img.shields.io/badge/revolut-FFFFFF?style=for-the-badge&logo=revolut&logoColor=black
-
-[revolut_me]: https://revolut.me/anas4e
-
-[ko_fi_shield]: https://img.shields.io/badge/Ko--fi-F16061?style=for-the-badge&logo=ko-fi&logoColor=white
-
-[ko_fi_me]: https://ko-fi.com/anasbox
-
-[buy_me_coffee_shield]: 
-https://img.shields.io/badge/Buy%20Me%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black
-
-[buy_me_coffee_me]: https://www.buymeacoffee.com/anasbox
-
-[patreon_shield]: 
-https://img.shields.io/badge/patreon-404040?style=for-the-badge&logo=patreon&logoColor=white
-
-[patreon_me]:  https://patreon.com/AnasBox
