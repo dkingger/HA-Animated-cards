@@ -1,0 +1,157 @@
+type: custom:mushroom-entity-card
+entity: sensor.prusa_core_one_print_speed
+tap_action:
+  action: more-info
+icon: mdi:printer-3d-nozzle
+icon_color: blue
+name: Hastighed
+hold_action:
+  action: none
+double_tap_action:
+  action: none
+
+card_mod:
+  style:
+    .: |
+      ha-card {
+        /* ================= USER SETTINGS ================= */
+        {% set max_val = 200 %}
+
+        /* Når dette progress-sensor-kort er “gråt”, skal dette kort også være gråt */
+        {% set progress_entity = 'sensor.prusa_core_one_progress' %}
+
+        /* Hvornår betragtes printet som aktivt? */
+        {% set progress_active_min = 0 %}
+        {% set progress_done_at    = 100 %}
+        /* ================================================= */
+
+        /* --- SPEED (denne cards entity) --- */
+        {% set val = states(config.entity) | float(0) %}
+
+        /* --- PROGRESS (styrer grå/aktiv) --- */
+        {% set p = states(progress_entity) | float(0) %}
+        {% set active = (p > progress_active_min) and (p < progress_done_at) %}
+        {% set is_done = (p >= progress_done_at) %}
+
+        /* Calculate Percentage Width (baseret på hastighed) */
+        {% set width_pct = (val / max_val * 100) | round(2) %}
+        {% if width_pct > 100 %}{% set width_pct = 100 %}{% endif %}
+        {% if width_pct < 0 %}{% set width_pct = 0 %}{% endif %}
+
+        /* --- CSS VARIABLES --- */
+        --bar-width: {{ width_pct }}%;
+        --bar-opacity: {{ 1 if active else 0 }};
+        --done-opacity: {{ 1 if is_done else 0 }};
+
+        /* Icon Variables */
+        --custom-icon-anim: {{ 'printer-sequence 2.2s cubic-bezier(.45,0,.55,1) infinite' if active else 'none' }};
+        --custom-icon-shadow: {{ '0 0 10px 5px rgba(var(--rgb-' ~ config.icon_color ~ '), 0.6)' if active else 'none' }};
+        --custom-icon-opacity: 1;
+
+        /* --- CARD STYLING LOGIC --- */
+        /* Kun "dark + glow" når progress siger vi er aktive */
+        {% if active %}
+          background-color: #1c1c1c !important;
+          border: none !important;
+          /* Ambient Glow */
+          background-image:
+            radial-gradient(circle at 24px 24px,
+              rgba(var(--rgb-{{ config.icon_color }}), 0.35) 0%,
+              rgba(var(--rgb-{{ config.icon_color }}), 0.1) 40%,
+              transparent 80%),
+            linear-gradient(to right,
+              rgba(255,255,255,0.1),
+              rgba(255,255,255,0.1)) !important;
+        {% else %}
+          /* Når progress-kortet er "gråt" → lad temaet styre */
+          background-image: none !important;
+          box-shadow: none !important;
+        {% endif %}
+
+        border-radius: 12px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.5s ease;
+        background-size: 100% 100%, 100% 6px !important;
+        background-position: top left, bottom left !important;
+        background-repeat: no-repeat !important;
+      }
+
+      /* --- THE "DONE" BADGE --- */
+      ha-card::before {
+        content: 'DONE';
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        font-size: 10px;
+        font-weight: 900;
+        letter-spacing: 1px;
+        color: #00ff00;
+        background: rgba(0, 255, 0, 0.15);
+        border: 1px solid rgba(0, 255, 0, 0.5);
+        padding: 2px 6px;
+        border-radius: 4px;
+        box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+
+        opacity: var(--done-opacity);
+        transform: scale(var(--done-opacity));
+        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        pointer-events: none;
+      }
+
+      /* --- ACTIVE PROGRESS BAR (BEAM) --- */
+      ha-card::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 6px;
+        width: var(--bar-width);
+
+        background: linear-gradient(90deg,
+          rgba(var(--rgb-{{ config.icon_color }}), 0.4) 0%,
+          rgba(var(--rgb-{{ config.icon_color }}), 1) 100%
+        );
+
+        box-shadow: 0 -2px 10px rgba(var(--rgb-{{ config.icon_color }}), 0.8);
+        opacity: var(--bar-opacity);
+        transition: width 0.5s ease-out, opacity 0.5s ease;
+        animation: bar-flow 2s infinite linear;
+        pointer-events: none;
+      }
+
+      @keyframes bar-flow {
+        0% { filter: brightness(1); }
+        50% { filter: brightness(1.3); }
+        100% { filter: brightness(1); }
+      }
+
+      mushroom-shape-icon {
+        --icon-size: 65px;
+        display: flex;
+        margin: -20px 0 10px -20px !important;
+        padding-right: 15px;
+        padding-bottom: 15px;
+      }
+
+    mushroom-shape-icon$: |
+      .shape {
+        --shape-animation: var(--custom-icon-anim) !important;
+        box-shadow: var(--custom-icon-shadow) !important;
+        opacity: var(--custom-icon-opacity) !important;
+        transform-origin: 50% 80%;
+        will-change: transform;
+      }
+
+      /* === FLYDENDE SIDE-TIL-SIDE ±25px (samme navn som før) === */
+      @keyframes printer-sequence {
+        0%   { transform: translateX(-25px) scale(0.98); }
+        25%  { transform: translateX(  0px) scale(1.02); }
+        50%  { transform: translateX( 25px) scale(0.98); }
+        75%  { transform: translateX(  0px) scale(1.02); }
+        100% { transform: translateX(-25px) scale(0.98); }
+      }
+
+grid_options:
+  columns: 12
+  rows: 1
